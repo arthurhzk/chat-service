@@ -110,5 +110,6 @@ export class ChattyServer {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private socketIOConnections(io: Server): void {}
 }
