@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
-import { ChattyServer } from '@root/setupServer';
-import databaseConnection from '@root/setupDatabase';
+import { ChattyServer } from '../src/setup-server';
+import databaseConnection from '../src/setup-database';
 import { config } from '@root/config';
 
 class Application {
