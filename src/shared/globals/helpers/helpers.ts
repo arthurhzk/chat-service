@@ -13,4 +13,12 @@ export class Helpers {
     const randomInteger = randomBytes.readUInt32BE(0);
     return randomInteger.toString();
   }
+
+  public static parseJson(prop: string): any {
+    try {
+      return JSON.parse(prop);
+    } catch (error) {
+      return prop;
+    }
+  }
 }
