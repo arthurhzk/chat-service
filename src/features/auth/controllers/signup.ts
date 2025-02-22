@@ -13,6 +13,9 @@ import { IUserDocument } from '@auth/interfaces/user.interface';
 import { UserCache } from '@root/services/redis/user.cache';
 import { omit } from 'lodash';
 import { authQueue } from '@root/services/queues/auth.queue';
+import { userQueue } from '@root/services/queues/user.queue';
+import JWT from 'jsonwebtoken';
+import { config } from '@root/config';
 
 const userCache: UserCache = new UserCache();
 export class SignUp {
@@ -43,7 +46,24 @@ export class SignUp {
     await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
     omit(userDataForCache, ['uId', 'username', 'email', 'avatarColor', 'password']);
     authQueue.addAuthUserJob('addAuthUserToDB', { value: userDataForCache });
-    res.status(HTTP_STATUS.CREATED).json({ message: 'User created successfully!' });
+    userQueue.addUserJob('addUserToDB', { value: userDataForCache });
+    const userJwt: string = SignUp.prototype.signToken(authData, userObjectId);
+    req.session = { jwt: userJwt };
+    res.status(HTTP_STATUS.CREATED).json({ message: 'User created successfully!', user: userDataForCache, token: userJwt });
+  }
+  private signToken(data: IAuthDocument, userObjectId: ObjectId) {
+    return JWT.sign(
+      {
+        _id: data._id,
+        username: data.username,
+        email: data.email,
+        avatarColor: data.avatarColor,
+        uId: data.uId,
+        userObjectId
+      },
+      config.JWT_TOKEN!,
+      { expiresIn: '1d' }
+    );
   }
   private signupData(data: ISignUpData): IAuthDocument {
     const { _id, username, password, email, avatarColor, uId } = data;
