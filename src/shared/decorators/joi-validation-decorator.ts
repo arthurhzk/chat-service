@@ -10,11 +10,10 @@ export function JoiValidation(schema: ObjectSchema): IJoiDecorator {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
-      const request: Request = args[0];
-      const { error } = await Promise.resolve(schema.validate(request.body, { abortEarly: false }));
+      const req: Request = args[0];
+      const { error } = await Promise.resolve(schema.validate(req.body));
       if (error?.details) {
-        const message = error.details.map((err) => err.message).join(', ');
-        throw new JoiRequestValidationError(message);
+        throw new JoiRequestValidationError(error.details[0].message);
       }
       return originalMethod.apply(this, args);
     };
