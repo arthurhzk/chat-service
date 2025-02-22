@@ -1,13 +1,13 @@
 import { SignIn } from '@auth/controllers/signin';
 import { SignOut } from '@auth/controllers/signout';
 import { SignUp } from '@auth/controllers/signup';
-import express, { Router } from 'express';
+import { Router } from 'express';
 
 class AuthRoutes {
   private router: Router;
 
   constructor() {
-    this.router = express.Router();
+    this.router = Router();
   }
 
   public routes(): Router {
