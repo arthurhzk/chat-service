@@ -81,6 +81,9 @@ export class UserCache extends BaseCache {
       response.social = Helpers.parseJson(`${response.social}`);
       response.followersCount = Helpers.parseJson(`${response.followersCount}`);
       response.followingCount = Helpers.parseJson(`${response.followingCount}`);
+      response.email = `${response.email}`;
+      response.username = `${response.username}`;
+      response.avatarColor = `${response.avatarColor}`;
 
       return response;
     } catch (error) {
@@ -89,3 +92,5 @@ export class UserCache extends BaseCache {
     }
   }
 }
+
+export const userCache: UserCache = new UserCache();
