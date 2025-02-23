@@ -8,6 +8,9 @@ import { BadRequestError } from '@global/helpers/error-handler';
 import { IUserDocument } from '@auth/interfaces/user.interface';
 import { loginSchema } from '@auth/schemas/signin';
 import { authService } from '@root/services/db/auth-service';
+import { mailTransport } from '@root/services/emails/email-transport';
+import { forgotPasswordTemplate } from '@root/services/emails/templates/forgot-password/forgot-password-template';
+import { emailQueue } from '@root/services/queues/email-queue';
 
 export class SignIn {
   @JoiValidation(loginSchema)
@@ -33,15 +36,10 @@ export class SignIn {
       config.JWT_TOKEN!
     );
     req.session = { jwt: userJwt };
-    const userDocument: IUserDocument = {
-      authId: existingUser!._id,
-      username: existingUser!.username,
-      email: existingUser!.email,
-      avatarColor: existingUser!.avatarColor,
-      uId: existingUser!.uId,
-      createdAt: existingUser!.createdAt
-    } as IUserDocument;
+    const resetLink = `${config.CLIENT_URL}/reset-password/${userJwt}`;
+    const template = forgotPasswordTemplate.passwordResetTemplate(existingUser.username!, resetLink);
+    emailQueue.addEmailJob('forgotPasswordEmail', { template, receiverEmail: config.SENDER_EMAIL!, subject: 'Reset Password' });
 
-    res.status(HTTP_STATUS.OK).json({ message: 'User login successfully', user: userDocument, token: userJwt });
+    res.status(HTTP_STATUS.OK).json({ message: 'User login successfully', user: existingUser, token: userJwt });
   }
 }
