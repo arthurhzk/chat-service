@@ -5,13 +5,10 @@ import { JoiValidation } from '@root/shared/decorators/joi-validation-decorator'
 import HTTP_STATUS from 'http-status-codes';
 import { IAuthDocument } from '@auth/interfaces/auth.interface';
 import { BadRequestError } from '@global/helpers/error-handler';
-import { IUserDocument } from '@auth/interfaces/user.interface';
 import { loginSchema } from '@auth/schemas/signin';
 import { authService } from '@root/services/db/auth-service';
-import { mailTransport } from '@root/services/emails/email-transport';
 import { forgotPasswordTemplate } from '@root/services/emails/templates/forgot-password/forgot-password-template';
 import { emailQueue } from '@root/services/queues/email-queue';
-
 export class SignIn {
   @JoiValidation(loginSchema)
   public async read(req: Request, res: Response): Promise<void> {
@@ -36,6 +33,7 @@ export class SignIn {
       config.JWT_TOKEN!
     );
     req.session = { jwt: userJwt };
+
     const resetLink = `${config.CLIENT_URL}/reset-password/${userJwt}`;
     const template = forgotPasswordTemplate.passwordResetTemplate(existingUser.username!, resetLink);
     emailQueue.addEmailJob('forgotPasswordEmail', { template, receiverEmail: config.SENDER_EMAIL!, subject: 'Reset Password' });

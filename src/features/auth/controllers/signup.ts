@@ -18,6 +18,7 @@ import JWT from 'jsonwebtoken';
 import { config } from '@root/config';
 
 const userCache: UserCache = new UserCache();
+
 export class SignUp {
   @JoiValidation(signupSchema)
   public async create(req: Request, res: Response): Promise<void> {
@@ -43,14 +44,19 @@ export class SignUp {
     }
     const userDataForCache: IUserDocument = SignUp.prototype.userData(authData, userObjectId);
     userDataForCache.profilePicture = `https://res.cloudinary.com/dyamr9ym3/image/upload/v${result.version}/${userObjectId}`;
-    await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
+
+    await Promise.all([
+      userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache),
+      authQueue.addAuthUserJob('addAuthUserToDB', { value: userDataForCache }),
+      userQueue.addUserJob('addUserToDB', { value: userDataForCache })
+    ]);
+
     omit(userDataForCache, ['uId', 'username', 'email', 'avatarColor', 'password']);
-    authQueue.addAuthUserJob('addAuthUserToDB', { value: userDataForCache });
-    userQueue.addUserJob('addUserToDB', { value: userDataForCache });
     const userJwt: string = SignUp.prototype.signToken(authData, userObjectId);
     req.session = { jwt: userJwt };
     res.status(HTTP_STATUS.CREATED).json({ message: 'User created successfully!', user: userDataForCache, token: userJwt });
   }
+
   private signToken(data: IAuthDocument, userObjectId: ObjectId) {
     return JWT.sign(
       {
@@ -65,6 +71,7 @@ export class SignUp {
       { expiresIn: '1d' }
     );
   }
+
   private signupData(data: ISignUpData): IAuthDocument {
     const { _id, username, password, email, avatarColor, uId } = data;
     return {
@@ -77,6 +84,7 @@ export class SignUp {
       createdAt: new Date()
     } as unknown as IAuthDocument;
   }
+
   private userData(data: IAuthDocument, userObjectId: ObjectId): IUserDocument {
     const { _id, username, email, uId, password, avatarColor } = data;
     return {

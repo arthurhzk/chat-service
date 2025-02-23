@@ -15,4 +15,4 @@ class ResetPasswordTemplate {
     });
   }
 }
-export const rwesetPasswordTemplate: ResetPasswordTemplate = new ResetPasswordTemplate();
+export const resetPasswordTemplate: ResetPasswordTemplate = new ResetPasswordTemplate();
