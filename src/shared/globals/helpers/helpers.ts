@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { ObjectId } from 'mongoose';
 
 export class Helpers {
   public static firstLetterUppercase(str: string): string {
@@ -14,7 +15,7 @@ export class Helpers {
     return randomInteger.toString();
   }
 
-  public static parseJson(prop: string): any {
+  public static parseJson(prop: string) {
     try {
       return JSON.parse(prop);
     } catch (error) {

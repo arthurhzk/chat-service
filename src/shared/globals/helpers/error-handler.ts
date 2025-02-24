@@ -47,7 +47,14 @@ export class BadRequestError extends CustomError {
     super(message);
   }
 }
+export class ConflictError extends CustomError {
+  statusCode = HTTP_STATUS.CONFLICT;
+  status = 'error';
 
+  constructor(message: string) {
+    super(message);
+  }
+}
 export class NotFoundError extends CustomError {
   statusCode = HTTP_STATUS.NOT_FOUND;
   status = 'error';

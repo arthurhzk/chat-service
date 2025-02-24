@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Application, json, urlencoded, Response, Request, NextFunction } from 'express';
 import http from 'http';
 import cors from 'cors';
@@ -14,6 +15,7 @@ import 'express-async-errors';
 import { config } from '@root/config';
 import applicationRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
+import { SocketIOpost } from '@socket/post';
 
 const SERVER_PORT = 8080;
 const log: Logger = config.createLogger('server');
@@ -111,5 +113,8 @@ export class ChattyServer {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private socketIOConnections(io: Server): void {}
+  private socketIOConnections(io: Server): void {
+    const postSocketHandler: SocketIOpost = new SocketIOpost(io);
+    postSocketHandler.listen();
+  }
 }
